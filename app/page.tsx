@@ -3,17 +3,22 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import { Document } from "@contentful/rich-text-types";
 import Image from "next/image";
 
+// what to change
+// homepageTitle
+// homepageDesc
+// backgroundImg
+
 const client = createClient({
   space: process.env.CONTENTFUL_SPACE_ID,
   accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
 });
 
-async function fetchHomepageData() {
+async function fetchData() {
   const res = await client.getEntries({ content_type: "homepage" });
   return res.items.map((item) => item.fields);
 }
 
-interface HomePageFields {
+interface pageFields {
   homepageTitle: string;
   homepageDesc: Document;
   backgroundImg: {
@@ -32,9 +37,9 @@ interface HomePageFields {
 }
 
 export default async function Home() {
-  const homepageData = await fetchHomepageData();
+  const fetchedData = await fetchData();
 
-  if (!homepageData || homepageData.length === 0) {
+  if (!fetchedData || fetchedData.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         No data found
@@ -43,22 +48,25 @@ export default async function Home() {
   }
 
   const { homepageTitle, homepageDesc, backgroundImg } =
-    homepageData[0] as unknown as HomePageFields;
+    fetchedData[0] as unknown as pageFields;
   const imageUrl = "https:" + backgroundImg.fields.file.url;
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen relative overflow-hidden">
       <div className="bg-black absolute inset-0 opacity-[0.5] z-[1]"></div>
-      <h1 className="text-3xl font-bold z-[2]">{homepageTitle}</h1>
-      <div className="mt-4 text-xl z-[2]">
-        {documentToReactComponents(homepageDesc)}
-      </div>
-      <div className="mt-4 absolute inset-0 z-[-1] h-screen">
-        <Image
-          src={imageUrl}
-          alt="hero"
-          width={backgroundImg.fields.file.details.image.width}
-          height={backgroundImg.fields.file.details.image.height}
-        />
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold z-[2] text-white w-3/4 text-center">
+  {homepageTitle}
+</h1>
+<div className="mt-4 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl z-[2] text-white w-3/4 text-center">
+  {documentToReactComponents(homepageDesc)}
+</div>
+
+      <div
+        className="mt-4 absolute inset-0 z-[-1] h-screen"
+        style={{
+          backgroundImage: `url(${imageUrl})`,
+          backgroundSize: "cover",
+        }}
+      >
       </div>
     </div>
   );
